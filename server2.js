@@ -55,8 +55,8 @@ app.get("/getUsers", async (req, res) => {
 app.get("/getUser/:id", async (req, res) => {
   try {
     let userId = Number(req.params.id);
-    console.log(userId)
-    const user = await User.findOne({id : userId});
+    console.log(userId);
+    const user = await User.findOne({ id: userId });
 
     if (!user) {
       return res.status(404).json({ message: "user not found" });
@@ -74,30 +74,54 @@ app.get("/getUser/:id", async (req, res) => {
   }
 });
 
+app.delete("/deleteUser/:id", async (req, res) => {
+  try {
+    let userId = req.params.id;
 
-app.delete('/deleteUser/:id',async(req, res) =>{
-    try {
-        let userId = req.params.id
+    // let deleteUser = await User.findOneAndDelete({userId})
+    let deleteUser = await User.findByIdAndDelete(userId);
 
-        // let deleteUser = await User.findOneAndDelete({userId})
-        let deleteUser = await User.findByIdAndDelete(userId)
-
-        if(!deleteUser){
-            return res.status(404).json({message : 'user not found'})
-        }
-
-        res.status(200).json({
-            message : 'User deleted successfully',
-            data : deleteUser
-        })
-        
-    } catch (error) {
-        res.status(500).json({
-            message : 'error deleting user',
-            error : error.message
-        })
+    if (!deleteUser) {
+      return res.status(404).json({ message: "user not found" });
     }
-})
+
+    res.status(200).json({
+      message: "User deleted successfully",
+      data: deleteUser,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "error deleting user",
+      error: error.message,
+    });
+  }
+});
+
+app.put("/updateUser/:id", async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const updatedData = req.body;
+
+    const updateUser = await User.findByIdAndUpdate(userId, updatedData, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!updateUser) {
+      return res.status(404).json({ message: "user not found" });
+    }
+
+    res.status(200).json({ 
+        message: "user updated successfully" ,
+        data : updateUser
+    });
+  } catch (error) {
+    res.status(500).json({
+        message : 'error updating user',
+        error : err.message
+    })
+  }
+});
 
 app.listen(3000, () => {
   console.log("server running on port 3000");
